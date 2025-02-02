@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
+use Illuminate\Auth\Access\Gate;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -49,6 +50,12 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
+        if (\Illuminate\Support\Facades\Gate::denies('update-event', $event)) {
+            abort(403, 'You are not authorized to update this event.');
+        }
+
+        $this->authorize('update-event', $event);
+
         $event->update(
             $request->validate([
                 'name' => 'required|string|max:255',
